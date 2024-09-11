@@ -14,8 +14,13 @@ func (lb *LoadBalancer) getNextServer(servers []*Server) *Server {
 	lb.Mutex.Lock()
 	defer lb.Mutex.Unlock()
 
+	if len(servers) == 0 {
+		return nil
+	}
+
+	start := lb.Current
 	for i := 0; i < len(servers); i++ {
-		idx := lb.Current % len(servers)
+		idx := start % len(servers)
 		nextServer := servers[idx]
 		lb.Current++
 
@@ -26,6 +31,8 @@ func (lb *LoadBalancer) getNextServer(servers []*Server) *Server {
 		if isHealthy {
 			return nextServer
 		}
+
+		start++
 	}
 
 	return nil
